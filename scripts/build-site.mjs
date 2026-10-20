@@ -10,7 +10,8 @@ if(!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository||'')){
 const {version}=JSON.parse(await readFile(join(root,'package.json'),'utf8'));
 const repositoryUrl=`https://github.com/${repository}`;
 const releaseUrl=`${repositoryUrl}/releases/tag/v${version}`;
-const asset=name=>`${repositoryUrl}/releases/download/v${version}/${encodeURIComponent(`TeX Suite-${version}-${name}`)}`;
+// GitHub replaces spaces in uploaded release asset names with dots.
+const asset=name=>`${repositoryUrl}/releases/download/v${version}/${encodeURIComponent(`TeX.Suite-${version}-${name}`)}`;
 const values={
   VERSION:version,
   REPOSITORY_URL:repositoryUrl,
