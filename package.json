@@ -1,0 +1,113 @@
+{
+  "name": "tex-suite",
+  "version": "0.3.2",
+  "description": "A visual LaTeX workspace for manuscripts and presentations.",
+  "private": true,
+  "author": "TeX Suite",
+  "license": "MIT",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "start": "electron .",
+    "test": "node --test tests/*.test.mjs",
+    "test:ui": "playwright test",
+    "package": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder",
+    "dist:win": "npm run build && electron-builder --win nsis --x64 --publish never",
+    "dist:mac": "npm run build && electron-builder --mac dmg --x64 --arm64 --publish never",
+    "dist:linux": "npm run build && electron-builder --linux AppImage deb --publish never",
+    "site:build": "node scripts/build-site.mjs",
+    "test:desktop": "node scripts/electron-smoke.cjs",
+    "test:compile": "node scripts/compile-smoke.mjs"
+  },
+  "build": {
+    "appId": "org.texsuite.desktop",
+    "productName": "TeX Suite",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "src/core/**/*",
+      "package.json",
+      "LICENSE",
+      "THIRD-PARTY.txt",
+      "README.md",
+      "THIRD-PARTY-NOTICES.txt"
+    ],
+    "directories": {
+      "output": "release-v032"
+    },
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.ico",
+      "signExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "include": "build/installer.nsh"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Office",
+      "icon": "build/icon.png"
+    },
+    "extraResources": [
+      {
+        "from": "assets",
+        "to": "licenses/fonts",
+        "filter": [
+          "*.txt"
+        ]
+      },
+      {
+        "from": "THIRD-PARTY.txt",
+        "to": "licenses/THIRD-PARTY.txt"
+      },
+      {
+        "from": "THIRD-PARTY-NOTICES.txt",
+        "to": "licenses/THIRD-PARTY-NOTICES.txt"
+      }
+    ]
+  },
+  "dependencies": {
+    "adm-zip": "^0.6.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "electron": "^44.9.1",
+    "electron-builder": "^26.15.3",
+    "vite": "^8.3.4",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/legacy-modes": "^6.5.5",
+    "@tiptap/extension-image": "^3.32.0",
+    "@tiptap/extension-subscript": "^3.32.0",
+    "@tiptap/extension-superscript": "^3.32.0",
+    "@tiptap/extension-table": "^3.32.0",
+    "@tiptap/extension-text-align": "^3.32.0",
+    "@tiptap/extension-text-style": "^3.32.0",
+    "@tiptap/react": "^3.32.0",
+    "@tiptap/starter-kit": "^3.32.0",
+    "@uiw/react-codemirror": "^4.25.12",
+    "docx": "^9.13.0",
+    "lucide-react": "^1.60.0",
+    "mammoth": "^1.13.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}

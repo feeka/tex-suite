@@ -1,0 +1,9 @@
+/* TeX Gyre fonts, distributed under the GUST Font License. See GUST-FONT-LICENSE.txt. */
+@font-face{font-family:Suite Sans;src:url('./texgyreheros-regular.otf');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:Suite Sans;src:url('./texgyreheros-bold.otf');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:Suite Sans;src:url('./texgyreheros-italic.otf');font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:Suite Sans;src:url('./texgyreheros-bolditalic.otf');font-weight:700;font-style:italic;font-display:swap}
+@font-face{font-family:Suite Serif;src:url('./texgyrepagella-regular.otf');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:Suite Serif;src:url('./texgyrepagella-bold.otf');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:Suite Serif;src:url('./texgyrepagella-italic.otf');font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:Suite Serif;src:url('./texgyrepagella-bolditalic.otf');font-weight:700;font-style:italic;font-display:swap}

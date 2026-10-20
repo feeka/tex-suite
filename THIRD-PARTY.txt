@@ -1,0 +1,41 @@
+TeX Suite uses the following open-source components:
+
+React and React DOM — Meta Platforms, Inc. and affiliates — MIT
+Electron — Electron contributors — MIT; Chromium third-party notices ship
+with the packaged runtime.
+CodeMirror — Marijn Haverbeke and contributors — MIT
+@uiw/react-codemirror — uiw contributors — MIT
+Lucide icons — Lucide contributors — ISC
+Vite, Playwright, electron-builder — development/build dependencies;
+see each package's license in node_modules.
+
+TeX Gyre Heros and TeX Gyre Pagella fonts:
+Heros: Copyright 2007–2009 B. Jackowski and J. M. Nowacki.
+Pagella: Copyright 2007–2018 B. Jackowski, J. M. Nowacki et al.
+On behalf of TeX users groups; see the included upstream README files.
+Distributed without modification under the GUST Font License, based on LPPL.
+The font license and upstream README files are included in assets/ and in
+resources/licenses/fonts in desktop distributions.
+https://www.gust.org.pl/projects/e-foundry/tex-gyre
+https://www.latex-project.org/lppl/lppl-1-3c/
+
+TinyTeX is downloaded separately from the official distribution when needed.
+TeX Live and its packages carry their respective licenses; these remain in
+the installed distribution.
+
+The Stuttgart-inspired palette is a template preset. TeX Suite is not endorsed
+by Microsoft or the University of Stuttgart and does not include their logos.
+
+Tiptap core and open-source extensions — Tiptap GmbH and contributors — MIT
+ProseMirror — Marijn Haverbeke and contributors — MIT
+Mammoth — Michael Williamson and contributors — BSD-2-Clause
+docx — dolanmiu and contributors — MIT
+adm-zip — ADM ZIP contributors — MIT
+
+Native publisher and university classes are installed separately through TeX
+Live/MiKTeX, retaining their upstream licenses. Springer Nature's official
+template archive is downloaded directly to the user's cache on first use.
+No publisher or university endorsement is claimed. See src/core/catalog.mjs
+for the source URLs of every template.
+
+Full editor-library license texts are collected in THIRD-PARTY-NOTICES.txt.
