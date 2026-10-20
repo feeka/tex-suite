@@ -13,7 +13,7 @@
   <header class="site-header">
     <div class="shell header-inner">
       <a class="brand" href="#top" aria-label="TeX Suite home"><img src="icon.png" alt="" width="40" height="40"><span>TeX Suite</span></a>
-      <nav aria-label="Main navigation"><a href="#downloads">Downloads</a><a href="#build">Build from source</a><a href="{{REPOSITORY_URL}}">GitHub ↗</a></nav>
+      <nav aria-label="Main navigation"><a href="#downloads">Downloads</a><a href="#about">About</a><a href="{{REPOSITORY_URL}}/issues">Issues ↗</a><a href="{{REPOSITORY_URL}}">GitHub ↗</a></nav>
     </div>
   </header>
 
@@ -24,6 +24,7 @@
         <h1>A desktop editor for <span>LaTeX manuscripts</span> and slides.</h1>
         <p class="lede">Write visually or in LaTeX. Compile locally and preview the PDF. Your projects stay on your computer.</p>
         <div class="hero-actions"><a class="button button-primary" href="#downloads">Download TeX Suite <span aria-hidden="true">↓</span></a><a class="button button-outline" href="{{REPOSITORY_URL}}">View source ↗</a></div>
+        <p class="hero-note">Open source · Vibe coded with OpenAI Codex · Made on the side for TeX enthusiasts</p>
       </div>
       <div class="preview" aria-label="Illustration of the TeX Suite editor">
         <div class="preview-top"><span class="preview-logo">T<span>e</span>X</span><strong>texManuscript</strong><span class="preview-saved">✓ Saved locally</span><span class="preview-action">Create PDF</span></div>
@@ -38,7 +39,9 @@
       <article class="download-card"><div class="platform-symbol">⌁</div><h3>Linux</h3><p>AppImage or Debian package</p><a class="download-link" href="{{LINUX_X64_APPIMAGE}}">x64 AppImage <span>↗</span></a><a class="download-link secondary" href="{{LINUX_ARM64_APPIMAGE}}">ARM64 AppImage <span>↗</span></a><div class="small-links"><a href="{{LINUX_X64_DEB}}">x64 .deb</a><a href="{{LINUX_ARM64_DEB}}">ARM64 .deb</a></div></article>
     </div><p class="download-note">Installers are currently unsigned. A local TeX installation is detected automatically; the app can set up TinyTeX if needed.</p></div></section>
 
-    <section class="details shell"><div class="detail"><span class="detail-number">01</span><h3>Manuscripts</h3><p>Flowing text, figures, tables, and journal LaTeX classes.</p></div><div class="detail"><span class="detail-number">02</span><h3>Presentations</h3><p>Visual slide layouts and editable Beamer source.</p></div><div class="detail"><span class="detail-number">03</span><h3>Local projects</h3><p>Autosaved files with their exact location visible in the editor.</p></div></section>
+    <section class="details shell"><div class="detail"><img class="detail-icon" src="icons/manuscript.svg" alt=""><h3>Manuscripts</h3><p>Flowing text, figures, tables, and journal LaTeX classes.</p></div><div class="detail"><img class="detail-icon" src="icons/slides.svg" alt=""><h3>Presentations</h3><p>Visual slide layouts and editable Beamer source.</p></div><div class="detail"><img class="detail-icon" src="icons/local.svg" alt=""><h3>Local projects</h3><p>Autosaved files with their exact location visible in the editor.</p></div></section>
+
+    <section class="about-section" id="about"><div class="shell about-inner"><img src="icons/issues.svg" alt="" width="64" height="64"><div><p class="eyebrow">BUILT IN THE OPEN</p><h2>Help us make it better.</h2><p>TeX Suite is an open-source side project for TeX enthusiasts, vibe coded with OpenAI Codex. Bugs, ideas, rough edges, template requests: put them all in GitHub Issues so we can fix them together.</p></div><a class="button button-primary" href="{{REPOSITORY_URL}}/issues/new">Open an issue <span aria-hidden="true">↗</span></a></div></section>
 
     <section class="build-section" id="build"><div class="shell build-inner"><div><p class="eyebrow">OPEN SOURCE</p><h2>Build from source.</h2><p>Node.js 22 or later and npm. Install a TeX distribution to compile documents.</p><a class="source-link" href="{{REPOSITORY_URL}}">Source and build instructions ↗</a></div><pre><code>npm ci
 npm test

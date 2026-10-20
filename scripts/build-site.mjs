@@ -1,4 +1,4 @@
-import {readFile,writeFile,copyFile,mkdir} from 'node:fs/promises';
+import {readFile,writeFile,copyFile,mkdir,cp} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {dirname,join,resolve} from 'node:path';
 
@@ -32,4 +32,5 @@ await mkdir(out,{recursive:true});
 await writeFile(join(out,'index.html'),html);
 await copyFile(join(root,'docs','style.css'),join(out,'style.css'));
 await copyFile(join(root,'build','icon.png'),join(out,'icon.png'));
+await cp(join(root,'docs','icons'),join(out,'icons'),{recursive:true});
 console.log(`Built landing page for ${repository} v${version} in ${out}`);
