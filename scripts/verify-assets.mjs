@@ -7,9 +7,9 @@ const expected=[
   `TeX Suite-${version}-win-x64.exe`,
   `TeX Suite-${version}-mac-x64.dmg`,
   `TeX Suite-${version}-mac-arm64.dmg`,
-  `TeX Suite-${version}-linux-x64.AppImage`,
+  `TeX Suite-${version}-linux-x86_64.AppImage`,
   `TeX Suite-${version}-linux-arm64.AppImage`,
-  `TeX Suite-${version}-linux-x64.deb`,
+  `TeX Suite-${version}-linux-amd64.deb`,
   `TeX Suite-${version}-linux-arm64.deb`,
 ];
 const missing=expected.filter(name=>!names.has(name));

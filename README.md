@@ -4,7 +4,7 @@ A local desktop editor for LaTeX manuscripts and Beamer presentations. Edit visu
 
 ## Download
 
-Use the repository’s **Releases** page for installers. Version 0.3.2 provides Windows x64, macOS Intel and Apple silicon, and Linux x64 and ARM64 builds through the [release workflow](.github/workflows/desktop-build.yml). The installers are unsigned. Windows x64 has been built and tested locally; macOS and Linux builds require their native GitHub runners and have not been verified on this machine.
+Use the [download page](https://feeka.github.io/tex-suite/) or [GitHub Releases](https://github.com/feeka/tex-suite/releases) for installers. Version 0.3.2 provides Windows x64, macOS Intel and Apple silicon, and Linux x64 and ARM64 builds through the [release workflow](.github/workflows/desktop-build.yml). The installers are unsigned. Windows x64 has been built and tested locally; macOS and Linux builds require their native GitHub runners and have not been verified on this machine.
 
 The [landing page source](docs/index.html) is published through [GitHub Pages](.github/workflows/pages.yml) and links directly to the release files.
 
@@ -33,19 +33,7 @@ Output is written to `release-v032/`. A LaTeX distribution is required to compil
 
 Push this folder as the repository root, then push tag `v0.3.2`. The [release workflow](.github/workflows/desktop-build.yml) checks the tag against `package.json`, builds on five native runners, verifies all seven files, and attaches them with SHA-256 checksums to one GitHub Release. A manual workflow run builds downloadable Actions artifacts without publishing a release.
 
-For a new GitHub repository, replace `OWNER/REPO` and run:
-
-```sh
-git init -b main
-git add .
-git commit -m "TeX Suite 0.3.2"
-git remote add origin https://github.com/OWNER/REPO.git
-git push -u origin main
-git tag v0.3.2
-git push origin v0.3.2
-```
-
-For the website, enable **GitHub Pages → GitHub Actions** in the repository settings. The [Pages workflow](.github/workflows/pages.yml) deploys the matching landing page from `main`; its download links work after the release is published. To preview the site locally, run `node scripts/build-site.mjs owner/repository` and open `site/index.html`.
+For the website, the [Pages workflow](.github/workflows/pages.yml) deploys the matching landing page from `main`; its download links work after the release is published. To preview the site locally, run `node scripts/build-site.mjs feeka/tex-suite` and open `site/index.html`.
 
 ## Files and templates
 

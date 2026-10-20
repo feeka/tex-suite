@@ -65,7 +65,8 @@
         "deb"
       ],
       "category": "Office",
-      "icon": "build/icon.png"
+      "icon": "build/icon.png",
+      "maintainer": "TeX Suite contributors <feeka@users.noreply.github.com>"
     },
     "extraResources": [
       {

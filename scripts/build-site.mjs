@@ -18,9 +18,9 @@ const values={
   WINDOWS_X64:asset('win-x64.exe'),
   MAC_X64:asset('mac-x64.dmg'),
   MAC_ARM64:asset('mac-arm64.dmg'),
-  LINUX_X64_APPIMAGE:asset('linux-x64.AppImage'),
+  LINUX_X64_APPIMAGE:asset('linux-x86_64.AppImage'),
   LINUX_ARM64_APPIMAGE:asset('linux-arm64.AppImage'),
-  LINUX_X64_DEB:asset('linux-x64.deb'),
+  LINUX_X64_DEB:asset('linux-amd64.deb'),
   LINUX_ARM64_DEB:asset('linux-arm64.deb'),
 };
 let html=await readFile(join(root,'docs','index.html'),'utf8');
