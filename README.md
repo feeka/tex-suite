@@ -29,12 +29,6 @@ Build an installer on the matching operating system:
 
 Output is written to `release-v032/`. A LaTeX distribution is required to compile documents; the app detects one or can set up TinyTeX. Initial setup and missing packages require internet access.
 
-## Publish a release
-
-Push this folder as the repository root, then push tag `v0.3.2`. The [release workflow](.github/workflows/desktop-build.yml) checks the tag against `package.json`, builds on five native runners, verifies all seven files, and attaches them with SHA-256 checksums to one GitHub Release. A manual workflow run builds downloadable Actions artifacts without publishing a release.
-
-For the website, the [Pages workflow](.github/workflows/pages.yml) deploys the matching landing page from `main`; its download links work after the release is published. To preview the site locally, run `node scripts/build-site.mjs feeka/tex-suite` and open `site/index.html`.
-
 ## Files and templates
 
 Projects autosave as `.texsuite` files. **File location** beside the save status shows the full path and selects the file in the system file manager. PDF, LaTeX, Word, and portable project exports use the location chosen in their Save dialogs.
