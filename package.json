@@ -1,6 +1,6 @@
 {
   "name": "tex-suite",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "A visual LaTeX workspace for manuscripts and presentations.",
   "private": true,
   "author": "TeX Suite",
@@ -36,7 +36,7 @@
       "THIRD-PARTY-NOTICES.txt"
     ],
     "directories": {
-      "output": "release-v037"
+      "output": "release-v038"
     },
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "win": {

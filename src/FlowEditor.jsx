@@ -16,6 +16,7 @@ import {EditorView} from '@codemirror/view';
 import {stex} from '@codemirror/legacy-modes/mode/stex';
 import {publishers,publisherById} from './core/catalog.mjs';
 import {flowText} from './core/flow.mjs';
+import {syncFormulaSource} from './core/formula-sync.mjs';
 import {palettes} from './core/model.mjs';
 import {Bold,Italic,Underline,Strikethrough,Undo2,Redo2,List,ListOrdered,AlignLeft,AlignCenter,AlignRight,AlignJustify,ImagePlus,Table2,Search,Link,FileText,Code2,Columns2,Download,Upload,Plus,Minus,GripVertical,Trash2,LayoutGrid} from 'lucide-react';
 import './flow.css';
@@ -100,7 +101,8 @@ export function FlowEditor({project,onChange,source,mode,setMode,compiled,compil
   const onSourceChange=useCallback(value=>{
     if(value===sourceRef.current)return;
     sourceRef.current=value;
-    onChangeRef.current({...latest.current,sourceOverride:value});
+    const synced=syncFormulaSource(latest.current,value);
+    onChangeRef.current(synced?{...latest.current,flow:synced.flow}:{...latest.current,sourceOverride:value});
   },[]);
   const [revision,refresh]=useState(0),[find,setFind]=useState(''),[replacement,setReplacement]=useState(''),[searchOpen,setSearchOpen]=useState(false),[linkOpen,setLinkOpen]=useState(false),[link,setLink]=useState(''),[metaOpen,setMetaOpen]=useState(false);
   const imageInput=useRef(),figureInput=useRef(),wordInput=useRef();

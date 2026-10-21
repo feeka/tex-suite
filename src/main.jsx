@@ -7,6 +7,7 @@ import { stex } from '@codemirror/legacy-modes/mode/stex';
 import { ArrowUpRight, ArrowLeft, ArrowRight, ChevronDown, Plus, Search, LayoutTemplate, FileText, Presentation, FolderOpen, Puzzle, Settings2, X, Check, CheckCheck, CircleHelp, MoreHorizontal, Sparkles, Download, Play, Upload, ImagePlus, Type, Square, Table2, List, ListOrdered, Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Bold, Italic, Trash2, Copy, Magnet, PanelLeft, Code2, Columns2, MousePointer2, ZoomIn, ZoomOut, GripVertical, LoaderCircle, Terminal, RefreshCw, Monitor, ArrowDown, Layers, Save, FileCode2, ExternalLink, CheckCircle2, AlertCircle, Maximize2 } from 'lucide-react';
 import { uid, dimensions, palettes, templates, createProject, createPage, addElement, snapRect, resolveColor, validateProject, flowingCopy } from './core/model.mjs';
 import { projectToLatex } from './core/latex.mjs';
+import {syncFormulaSource} from './core/formula-sync.mjs';
 import './styles.css';
 import './science.css';
 import {FlowEditor} from './FlowEditor.jsx';
@@ -140,7 +141,8 @@ function App(){
   const onSourceChange=useCallback(value=>{
     if(!projectRef.current||value===sourceRef.current)return;
     sourceRef.current=value;
-    commit(p=>({...p,sourceOverride:value}));
+    const synced=syncFormulaSource(projectRef.current,value);
+    commit(p=>synced?{...p,pages:synced.pages,flow:synced.flow}:({...p,sourceOverride:value}));
   },[commit]);
   const guardVisual=()=>{
     if(project?.sourceOverride!=null){notify('Custom LaTeX is active. Use “Return to visual source” before changing the visual layout.');return false;}return true;
