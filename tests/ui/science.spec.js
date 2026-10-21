@@ -6,6 +6,16 @@ async function savedSource(page,fragment){
   const project=await page.evaluate(()=>JSON.parse(localStorage.getItem('texsuite-projects'))[0]);
   return projectToLatex(project);
 }
+async function clickBeforeSourceText(page,text){
+  const position=await page.evaluate(text=>{
+    const line=[...document.querySelectorAll('.cm-line')].find(el=>el.textContent.includes(text));
+    if(!line)throw new Error(`Source text not visible: ${text}`);
+    const walker=document.createTreeWalker(line,NodeFilter.SHOW_TEXT),target=line.textContent.indexOf(text);let seen=0;
+    for(let node;node=walker.nextNode();){const length=node.textContent.length;if(seen+length<=target){seen+=length;continue;}const at=target-seen,range=document.createRange();range.setStart(node,at);range.setEnd(node,at+1);const rect=range.getBoundingClientRect();return{x:rect.left+1,y:rect.top+rect.height/2};}
+    throw new Error(`Source text node not visible: ${text}`);
+  },text);
+  await page.mouse.click(position.x,position.y);
+}
 
 test('manuscript equation and reference remain editable and generate matching LaTeX',async({page})=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
@@ -60,6 +70,7 @@ test('Beamer formula changes round-trip between LaTeX and visual controls',async
   await page.getByRole('button',{name:'Select slide 2'}).click();
   await page.getByRole('button',{name:'∑ Formula'}).click();
   await page.getByLabel('Formula LaTeX').fill('E=mc^2');
+  await page.getByLabel('Equation label').fill('eq:old');
   await page.getByRole('button',{name:'LaTeX',exact:true}).click();
   const code=page.locator('.cm-content');
   const original=await savedSource(page,'E=mc^2');
@@ -70,40 +81,58 @@ test('Beamer formula changes round-trip between LaTeX and visual controls',async
   await code.click();await page.keyboard.press('Control+f');
   await page.locator('.cm-search input').first().fill('F=ma');
   await page.keyboard.press('Enter');await page.keyboard.press('Escape');
-  const position=await page.evaluate(()=>{
-    const line=[...document.querySelectorAll('.cm-line')].find(el=>el.textContent.includes('F=ma'));
-    if(!line)throw new Error('Formula line not visible');
-    const walker=document.createTreeWalker(line,NodeFilter.SHOW_TEXT),target=line.textContent.indexOf('F=ma');let seen=0;
-    for(let node;node=walker.nextNode();){const length=node.textContent.length;if(seen+length<=target){seen+=length;continue;}const at=target-seen,range=document.createRange();range.setStart(node,at);range.setEnd(node,at+1);const rect=range.getBoundingClientRect();return{x:rect.left+1,y:rect.top+rect.height/2};}
-    throw new Error('Formula text node not visible');
-  });
-  await page.mouse.click(position.x,position.y);
+  await clickBeforeSourceText(page,'F=ma');
   for(let i=0;i<4;i++)await page.keyboard.press('Delete');
   await page.keyboard.type('G=ma');
+  await code.click();await page.keyboard.press('Control+f');
+  await page.locator('.cm-search input').first().fill('eq:old');
+  await page.keyboard.press('Enter');await page.keyboard.press('Escape');
+  await clickBeforeSourceText(page,'old');
+  for(let i=0;i<3;i++)await page.keyboard.press('Delete');
+  await page.keyboard.type('new');
+  await code.click();await page.keyboard.press('Control+f');
+  await page.locator('.cm-search input').first().fill('eq:new');
+  await page.keyboard.press('Enter');await page.keyboard.press('Escape');
+  await clickBeforeSourceText(page,'eq:new');
+  for(let i=0;i<6;i++)await page.keyboard.press('Shift+ArrowRight');
+  await page.keyboard.type('eq:final');
   await page.getByRole('button',{name:'Visual',exact:true}).click();
   await page.getByTestId('page-canvas').locator('.canvas-formula').click();
   await expect(page.getByLabel('Formula LaTeX')).toHaveValue('G=ma');
+  await expect(page.getByLabel('Equation label')).toHaveValue('eq:final');
   await expect(page.locator('.source-banner')).toHaveCount(0);
   await page.getByLabel('Formula LaTeX').fill('a^2+b^2=c^2');
+  await page.getByLabel('Equation label').fill('eq:visual');
   await page.getByRole('button',{name:'LaTeX',exact:true}).click();
   await expect(code).toContainText('\\displaystyle a^2+b^2=c^2');
+  await expect(code).toContainText('\\label{eq:visual}');
 });
 
 test('manuscript equation changes round-trip between LaTeX and visual controls',async({page})=>{
   await page.goto('/');await page.locator('.create-card').filter({hasText:'texManuscript'}).click();
   await page.getByRole('button',{name:'Equation',exact:true}).click();
   await page.getByLabel('Display formula LaTeX').fill('E=mc^2');
+  await page.getByLabel('Equation label').fill('eq:old');
   await page.getByRole('button',{name:'LaTeX',exact:true}).click();
   const code=page.locator('.cm-content');
   const original=await savedSource(page,'E=mc^2');
   expect(original).toContain('\\begin{equation}\nE=mc^2');
   await code.click();await page.keyboard.press('Control+A');
-  await page.keyboard.insertText(original.replace('\\begin{equation}\nE=mc^2','\\begin{equation}\nF=ma'));
+  await page.keyboard.insertText(original.replace('\\begin{equation}\nE=mc^2','\\begin{equation}\nF=ma').replace('\\label{eq:old}','\\label{eq:new}'));
   await expect(code).toContainText('F=ma');
+  await code.click();await page.keyboard.press('Control+f');
+  await page.locator('.cm-search input').first().fill('eq:new');
+  await page.keyboard.press('Enter');await page.keyboard.press('Escape');
+  await clickBeforeSourceText(page,'eq:new');
+  for(let i=0;i<6;i++)await page.keyboard.press('Shift+ArrowRight');
+  await page.keyboard.type('eq:final');
   await page.getByRole('button',{name:'Write',exact:true}).click();
   await expect(page.getByLabel('Display formula LaTeX')).toHaveValue('F=ma');
+  await expect(page.getByLabel('Equation label')).toHaveValue('eq:final');
   await expect(page.locator('.source-banner')).toHaveCount(0);
   await page.getByLabel('Display formula LaTeX').fill('x^2+y^2');
+  await page.getByLabel('Equation label').fill('eq:visual');
   await page.getByRole('button',{name:'LaTeX',exact:true}).click();
   await expect(code).toContainText('x^2+y^2');
+  await expect(code).toContainText('\\label{eq:visual}');
 });

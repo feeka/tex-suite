@@ -76,7 +76,7 @@ jobs:
         if: startsWith(matrix.label, 'macOS')
         shell: bash
         run: |
-          app=$(find release-v038 -maxdepth 2 -name 'TeX Suite.app' -type d -print -quit)
+          app=$(find release-v039 -maxdepth 2 -name 'TeX Suite.app' -type d -print -quit)
           test -n "$app" || { echo '::error::App bundle missing'; exit 1; }
           codesign --verify --deep --strict --verbose=2 "$app"
           spctl --assess --type execute --verbose=4 "$app"
@@ -86,10 +86,10 @@ jobs:
           name: tex-suite-${{ matrix.artifact }}
           if-no-files-found: error
           path: |
-            release-v038/*.exe
-            release-v038/*.dmg
-            release-v038/*.AppImage
-            release-v038/*.deb
+            release-v039/*.exe
+            release-v039/*.dmg
+            release-v039/*.AppImage
+            release-v039/*.deb
 
   publish:
     name: Publish GitHub release

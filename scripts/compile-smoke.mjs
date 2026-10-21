@@ -13,16 +13,19 @@ for(const kind of ['beamer','manuscript']){
   if(kind==='beamer'){
     project.pages[1].elements.push({...addElement('list',kind),x:110,y:220,text:'First point\nSecond point'});
     project.pages[2].elements.push({...addElement('list',kind),x:110,y:220,listStyle:'enumerate',text:'One\nTwo'});
-    project.pages[1].elements.push({...addElement('formula',kind,project.palette),x:110,y:500});
+    project.pages[1].elements.push({...addElement('formula',kind,project.palette),x:110,y:500,label:'eq:old'});
+    project.pages[2].elements.push({...addElement('reference',kind,project.palette),x:110,y:500,target:'eq:new'});
   }
   if(kind==='manuscript'){
     project.pages[0].elements.push({...addElement('table',kind),y:930,h:100,fontSize:13});
-    project.flow.doc.content.push({type:'displayMath',attrs:{latex:'E=mc^2',label:'eq:smoke'}});
+    project.flow.doc.content.push({type:'displayMath',attrs:{latex:'E=mc^2',label:'eq:old'}});
+    project.flow.doc.content.push({type:'paragraph',content:[{type:'text',text:'Equation '},{type:'crossReference',attrs:{target:'eq:new'}}]});
   }
   const before=projectToLatex(project);
-  const edited=kind==='beamer'?before.replace('\\displaystyle E=mc^2','\\displaystyle F=ma'):before.replace('\\begin{equation}\nE=mc^2','\\begin{equation}\nF=ma');
+  const edited=(kind==='beamer'?before.replace('\\displaystyle E=mc^2','\\displaystyle F=ma'):before.replace('\\begin{equation}\nE=mc^2','\\begin{equation}\nF=ma')).replace('\\label{eq:old}','\\label{eq:new}');
   const synced=syncFormulaSource(project,edited);
   if(!synced||projectToLatex(synced)!==edited)throw new Error(`${kind} formula source did not synchronize`);
+  if(!edited.includes('\\label{eq:new}')||!edited.includes('\\ref{eq:new}')||edited.includes('\\label{eq:old}'))throw new Error(`${kind} label/reference source mismatch`);
   const result=await svc.compile(projectToLatex(synced));
   await fs.writeFile(`test-results/${kind}.log`,result.log);
   if(!result.ok){console.error(result.log.slice(-4500));process.exitCode=1;break;}

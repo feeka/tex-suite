@@ -142,7 +142,7 @@ function App(){
     if(!projectRef.current||value===sourceRef.current)return;
     sourceRef.current=value;
     const synced=syncFormulaSource(projectRef.current,value);
-    commit(p=>synced?{...p,pages:synced.pages,flow:synced.flow}:({...p,sourceOverride:value}));
+    commit(p=>synced?{...p,pages:synced.pages,flow:synced.flow,sourceOverride:null}:({...p,sourceOverride:value}));
   },[commit]);
   const guardVisual=()=>{
     if(project?.sourceOverride!=null){notify('Custom LaTeX is active. Use “Return to visual source” before changing the visual layout.');return false;}return true;

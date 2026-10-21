@@ -102,7 +102,7 @@ export function FlowEditor({project,onChange,source,mode,setMode,compiled,compil
     if(value===sourceRef.current)return;
     sourceRef.current=value;
     const synced=syncFormulaSource(latest.current,value);
-    onChangeRef.current(synced?{...latest.current,flow:synced.flow}:{...latest.current,sourceOverride:value});
+    onChangeRef.current(synced?{...latest.current,flow:synced.flow,sourceOverride:null}:{...latest.current,sourceOverride:value});
   },[]);
   const [revision,refresh]=useState(0),[find,setFind]=useState(''),[replacement,setReplacement]=useState(''),[searchOpen,setSearchOpen]=useState(false),[linkOpen,setLinkOpen]=useState(false),[link,setLink]=useState(''),[metaOpen,setMetaOpen]=useState(false);
   const imageInput=useRef(),figureInput=useRef(),wordInput=useRef();
