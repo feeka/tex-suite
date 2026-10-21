@@ -48,10 +48,39 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      - name: Require macOS distribution credentials
+        if: startsWith(matrix.label, 'macOS')
+        shell: bash
+        env:
+          CSC_LINK: ${{ startsWith(matrix.label, 'macOS') && secrets.MAC_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ startsWith(matrix.label, 'macOS') && secrets.MAC_CSC_KEY_PASSWORD || '' }}
+          APPLE_ID: ${{ startsWith(matrix.label, 'macOS') && secrets.MAC_APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ startsWith(matrix.label, 'macOS') && secrets.MAC_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ startsWith(matrix.label, 'macOS') && secrets.MAC_APPLE_TEAM_ID || '' }}
+        run: |
+          for name in CSC_LINK CSC_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::Missing $name; refusing to publish an unsigned macOS app."
+              exit 1
+            fi
+          done
       - name: Build installer
         run: npx electron-builder ${{ matrix.args }} --publish never
         env:
-          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          CSC_LINK: ${{ startsWith(matrix.label, 'macOS') && secrets.MAC_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ startsWith(matrix.label, 'macOS') && secrets.MAC_CSC_KEY_PASSWORD || '' }}
+          APPLE_ID: ${{ startsWith(matrix.label, 'macOS') && secrets.MAC_APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ startsWith(matrix.label, 'macOS') && secrets.MAC_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ startsWith(matrix.label, 'macOS') && secrets.MAC_APPLE_TEAM_ID || '' }}
+      - name: Verify macOS signature and notarization
+        if: startsWith(matrix.label, 'macOS')
+        shell: bash
+        run: |
+          app=$(find release-v037 -maxdepth 2 -name 'TeX Suite.app' -type d -print -quit)
+          test -n "$app" || { echo '::error::App bundle missing'; exit 1; }
+          codesign --verify --deep --strict --verbose=2 "$app"
+          spctl --assess --type execute --verbose=4 "$app"
+          xcrun stapler validate "$app"
       - uses: actions/upload-artifact@v4
         with:
           name: tex-suite-${{ matrix.artifact }}
