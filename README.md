@@ -2,13 +2,13 @@
 
 A local desktop editor for LaTeX manuscripts and Beamer presentations. Work visually or edit LaTeX source, then compile and preview a PDF.
 
-**[Download from version tags](https://github.com/feeka/tex-suite/tags)** · **[Report a problem or request a feature](https://github.com/feeka/tex-suite/issues/new)**
+**[Download v0.3.9](https://github.com/feeka/tex-suite/releases/tag/v0.3.9)** · **[Report a problem or request a feature](https://github.com/feeka/tex-suite/issues/new)**
 
-Open the newest tag, then its **Release** and choose the installer for your system under **Assets**. The “Source code” archives are not installers. Windows x64 is tested locally. Linux x64 and ARM64 packages are built on native runners but need hands-on testing.
+Choose the Windows x64 or Linux installer under **Assets**. The “Source code” archives are not installers. Windows x64 is tested locally. Linux x64 and ARM64 packages are built on native runners but need hands-on testing.
 
-The `main` branch contains version **0.3.9**, including the equation-label synchronization fix and expanded tests. **0.3.9 is not a tagged download yet**; the latest tagged release does not contain these changes.
+Version **0.3.9** includes the equation-label synchronization fix and expanded tests.
 
-**macOS:** The v0.3.7 DMGs are unsigned and unnotarized. A user has confirmed that macOS rejects the Apple silicon app as damaged. Do not use those Mac downloads. Future Mac releases must pass Developer ID signing, Apple notarization, and Gatekeeper checks before publication.
+**macOS:** There is no 0.3.9 Mac download. The older v0.3.7 DMGs are unsigned and unnotarized; a user confirmed that macOS rejects the Apple silicon app as damaged. Mac builds will return after Developer ID signing, notarization, and Gatekeeper verification work.
 
 ## Current scope
 

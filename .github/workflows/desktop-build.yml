@@ -82,5 +82,5 @@ jobs:
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" release-assets/* --clobber
           else
-            gh release create "$GITHUB_REF_NAME" release-assets/* --title "TeX Suite $GITHUB_REF_NAME (Windows and Linux)" --generate-notes --verify-tag
+            gh release create "$GITHUB_REF_NAME" release-assets/* --title "TeX Suite $GITHUB_REF_NAME (Windows and Linux)" --notes "Windows x64 and Linux x64/ARM64 installers. macOS is not included because signed and notarized builds are not yet available. Verify downloads with SHA256SUMS.txt." --verify-tag
           fi
