@@ -57,10 +57,10 @@ jobs:
           name: tex-suite-${{ matrix.artifact }}
           if-no-files-found: error
           path: |
-            release-v036/*.exe
-            release-v036/*.dmg
-            release-v036/*.AppImage
-            release-v036/*.deb
+            release-v037/*.exe
+            release-v037/*.dmg
+            release-v037/*.AppImage
+            release-v037/*.deb
 
   publish:
     name: Publish GitHub release

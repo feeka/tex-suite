@@ -6,6 +6,8 @@ export async function exportDocx(project){
   await inspect(project.flow.doc);
   function inline(n){
     if(n.type==='hardBreak')return new TextRun({break:1});
+    if(n.type==='inlineMath')return new TextRun({text:'$'+n.attrs.latex+'$'});
+    if(n.type==='crossReference')return new TextRun({text:'[ref: '+n.attrs.target+']'});
     if(n.type!=='text')return new TextRun('');
     const marks=n.marks||[],has=t=>marks.some(m=>m.type===t),style=marks.find(m=>m.type==='textStyle')?.attrs||{};
     const run=new TextRun({text:n.text,bold:has('bold'),italics:has('italic'),underline:has('underline')?{}:undefined,strike:has('strike'),superScript:has('superscript'),subScript:has('subscript'),color:/^#[a-f0-9]{6}$/i.test(style.color)?style.color.slice(1):undefined,size:Math.min(144,Math.max(12,(parseFloat(style.fontSize)||12)*2))});
@@ -30,8 +32,9 @@ export async function exportDocx(project){
         else {const rows=[];const columns=n.attrs.layout==='grid'?2:n.attrs.panels.length;for(let i=0;i<n.attrs.panels.length;i+=columns)rows.push(new TableRow({children:n.attrs.panels.slice(i,i+columns).map(panel=>cell(panel,Math.max(24,Math.floor(540/columns*panel.width/100))))}));content=[new Table({width:{size:100,type:WidthType.PERCENTAGE},rows})];}
         return [...content,...(n.attrs.caption?[new Paragraph({text:n.attrs.caption})]:[])];
       }
+      if(n.type==='displayMath')return new Paragraph({children:[new TextRun({text:n.attrs.latex,italics:true}),...(n.attrs.label?[new TextRun({text:'  ['+n.attrs.label+']'})]:[])]});
       if(n.type==='pageBreak')return new Paragraph({pageBreakBefore:true});
-      return new Paragraph({children:(n.content||[]).filter(c=>c.type==='text'||c.type==='hardBreak').map(inline),heading:n.type==='heading'?HeadingLevel[`HEADING_${Math.min(3,n.attrs?.level||1)}`]:undefined,alignment:n.attrs?.textAlign||undefined,bullet:bullet?{level:0}:undefined,numbering:ordered?{reference:'ordered',level:0}:undefined,spacing:{after:160,line:276}});
+      return new Paragraph({children:(n.content||[]).filter(c=>['text','hardBreak','inlineMath','crossReference'].includes(c.type)).map(inline),heading:n.type==='heading'?HeadingLevel[`HEADING_${Math.min(3,n.attrs?.level||1)}`]:undefined,alignment:n.attrs?.textAlign||undefined,bullet:bullet?{level:0}:undefined,numbering:ordered?{reference:'ordered',level:0}:undefined,spacing:{after:160,line:276}});
     });
   }
   const f=project.flow;

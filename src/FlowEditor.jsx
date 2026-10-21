@@ -1,6 +1,7 @@
 import React,{useCallback,useEffect,useRef,useState} from 'react';
 import {useEditor,EditorContent,NodeViewWrapper,ReactNodeViewRenderer} from '@tiptap/react';
 import {Node} from '@tiptap/core';
+import Heading from '@tiptap/extension-heading';
 import {DOMParser as ProseMirrorParser} from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
 import {TextStyleKit} from '@tiptap/extension-text-style';
@@ -45,6 +46,18 @@ const WrappedImage=Image.extend({
   addAttributes(){return {...this.parent?.(),width:{default:300},wrap:{default:'none',parseHTML:el=>el.style.float||'none',renderHTML:attrs=>({'data-wrap':attrs.wrap,style:`float:${attrs.wrap==='left'||attrs.wrap==='right'?attrs.wrap:'none'};width:${Math.min(660,Math.max(60,Number(attrs.width)||300))}px`})}};},
   addNodeView(){return ReactNodeViewRenderer(SingleImageView);}
 });
+const HeadingWithLabel=Heading.extend({
+  addAttributes(){return {...this.parent?.(),label:{default:'',parseHTML:el=>el.getAttribute('data-label')||'',renderHTML:attrs=>attrs.label?{'data-label':attrs.label}:{}}};}
+});
+function FormulaView({node,updateAttributes,inline=false}){
+  return <NodeViewWrapper as={inline?'span':'div'} className={inline?'inline-formula':'display-formula'} contentEditable={false}>
+    <span className="formula-glyph">∑</span>
+    {inline?<input aria-label="Inline formula LaTeX" value={node.attrs.latex} onChange={e=>updateAttributes({latex:e.target.value})}/>:<div className="formula-fields"><textarea aria-label="Display formula LaTeX" value={node.attrs.latex} onChange={e=>updateAttributes({latex:e.target.value})}/><input aria-label="Equation label" placeholder="eq:label" value={node.attrs.label} onChange={e=>(!e.target.value||/^[A-Za-z][A-Za-z0-9:_.-]{0,79}$/.test(e.target.value))&&updateAttributes({label:e.target.value})}/></div>}
+  </NodeViewWrapper>;
+}
+const InlineMath=Node.create({name:'inlineMath',group:'inline',inline:true,atom:true,addAttributes(){return{latex:{default:'x'}};},parseHTML(){return[{tag:'span[data-inline-math]'}];},renderHTML({node}){return['span',{'data-inline-math':node.attrs.latex},node.attrs.latex];},addNodeView(){return ReactNodeViewRenderer(props=><FormulaView {...props} inline/>);}});
+const DisplayMath=Node.create({name:'displayMath',group:'block',atom:true,addAttributes(){return{latex:{default:'E=mc^2'},label:{default:''}};},parseHTML(){return[{tag:'div[data-display-math]'}];},renderHTML({node}){return['div',{'data-display-math':node.attrs.latex,'data-label':node.attrs.label},node.attrs.latex];},addNodeView(){return ReactNodeViewRenderer(FormulaView);}});
+const CrossReference=Node.create({name:'crossReference',group:'inline',inline:true,atom:true,addAttributes(){return{target:{default:''}};},parseHTML(){return[{tag:'span[data-cross-reference]'}];},renderHTML({node}){return['span',{'data-cross-reference':node.attrs.target},'Ref: '+node.attrs.target];},addNodeView(){return ReactNodeViewRenderer(({node,updateAttributes})=><NodeViewWrapper as="span" className="cross-reference" contentEditable={false}>↗ <input aria-label="Reference label" value={node.attrs.target} onChange={e=>(!e.target.value||/^[A-Za-z][A-Za-z0-9:_.-]{0,79}$/.test(e.target.value))&&updateAttributes({target:e.target.value})}/></NodeViewWrapper>);}});
 const PageBreak=Node.create({name:'pageBreak',group:'block',atom:true,parseHTML(){return[{tag:'div[data-page-break]'}];},renderHTML(){return['div',{'data-page-break':'true',class:'document-page-break'},'Page break'];}});
 async function imagePanel(file){
   if(!file||!/^image\/(png|jpeg|webp)$/.test(file.type)||file.size>15000000)throw new Error('Choose PNG, JPEG or WebP figures under 15 MB each.');
@@ -74,11 +87,12 @@ function FigureGroupView({node,updateAttributes,deleteNode,selected}){
         <div className="figure-panel-actions"><button aria-label={`Move panel ${index+1} left`} disabled={index===0} onClick={()=>move(index,index-1)}>←</button><button aria-label={`Move panel ${index+1} right`} disabled={index===panels.length-1} onClick={()=>move(index,index+1)}>→</button><button aria-label={`Remove panel ${index+1}`} onClick={()=>panels.length===1?deleteNode():updateAttributes({panels:panels.filter((_,i)=>i!==index)})}><Trash2 size={12}/></button></div>
       </div>)}
     </div>
+    <input className="figure-label" aria-label="Figure label" placeholder="Figure label · fig:example" value={attrs.label||''} onChange={e=>(!e.target.value||/^[A-Za-z][A-Za-z0-9:_.-]{0,79}$/.test(e.target.value))&&updateAttributes({label:e.target.value})}/>
     <input className="figure-shared-caption" aria-label="Shared figure caption" placeholder="Shared figure caption" value={attrs.caption} onChange={e=>updateAttributes({caption:e.target.value})}/>
     <small>Drag panels to reorder them. The journal class controls final page placement.</small>
   </NodeViewWrapper>;
 }
-const FigureGroup=Node.create({name:'figureGroup',group:'block',atom:true,selectable:true,draggable:false,addAttributes(){return{layout:{default:'row'},width:{default:'column'},caption:{default:''},panels:{default:[]}};},parseHTML(){return[{tag:'figure[data-figure-group]'}];},renderHTML({node}){return['figure',{'data-figure-group':'true','data-layout':node.attrs.layout},['figcaption',{},node.attrs.caption||'Figure group']];},addNodeView(){return ReactNodeViewRenderer(FigureGroupView);}});
+const FigureGroup=Node.create({name:'figureGroup',group:'block',atom:true,selectable:true,draggable:false,addAttributes(){return{layout:{default:'row'},width:{default:'column'},caption:{default:''},label:{default:''},panels:{default:[]}};},parseHTML(){return[{tag:'figure[data-figure-group]'}];},renderHTML({node}){return['figure',{'data-figure-group':'true','data-layout':node.attrs.layout},['figcaption',{},node.attrs.caption||'Figure group']];},addNodeView(){return ReactNodeViewRenderer(FigureGroupView);}});
 export function FlowEditor({project,onChange,source,mode,setMode,compiled,compile,compileBusy,notify}){
   const latest=useRef(project);latest.current=project;
   const sourceRef=useRef(source);sourceRef.current=source;
@@ -114,7 +128,7 @@ export function FlowEditor({project,onChange,source,mode,setMode,compiled,compil
   },[source,project.id,project.updatedAt,templateState.status,compileBusy,compiled?.revision]);
   const updateFlow=patch=>{if(latest.current.sourceOverride!=null){notify('Restore generated source before changing the visual manuscript.');return;}onChange({...latest.current,flow:{...latest.current.flow,...patch}});};
   const editor=useEditor({
-    extensions:[StarterKit.configure({link:{openOnClick:false}}),TextStyleKit,TextAlign.configure({types:['heading','paragraph']}),WrappedImage.configure({allowBase64:true}),FigureGroup,TableKit.configure({table:{resizable:true}}),Subscript,Superscript,PageBreak],
+    extensions:[StarterKit.configure({link:{openOnClick:false},heading:false}),HeadingWithLabel,InlineMath,DisplayMath,CrossReference,TextStyleKit,TextAlign.configure({types:['heading','paragraph']}),WrappedImage.configure({allowBase64:true}),FigureGroup,TableKit.configure({table:{resizable:true}}),Subscript,Superscript,PageBreak],
     content:project.flow.doc,
     editorProps:{attributes:{class:'manuscript-prose','aria-label':'Manuscript text',role:'textbox',spellcheck:'true'},handleDrop:(_view,event)=>{const file=event.dataTransfer?.files?.[0];if(file?.type.startsWith('image/')){event.preventDefault();insertImage(file);return true;}return false;}},
     onUpdate:({editor})=>{updateFlow({doc:editor.getJSON()});refresh(n=>n+1);},
@@ -125,7 +139,10 @@ export function FlowEditor({project,onChange,source,mode,setMode,compiled,compil
   useEffect(()=>{editor?.setEditable(project.sourceOverride==null);},[project.sourceOverride,editor]);
   useEffect(()=>{const key=e=>{if(mode==='code'||mode==='preview')return;if((e.ctrlKey||e.metaKey)&&['f','h'].includes(e.key.toLowerCase())){e.preventDefault();setSearchOpen(true);requestAnimationFrame(()=>document.querySelector('input[aria-label="Find text"]')?.focus());}};window.addEventListener('keydown',key);return()=>window.removeEventListener('keydown',key);},[mode]);
   const chain=()=>editor?.chain().focus();
+  const labels=[];editor?.state.doc.descendants(n=>{if(n.attrs?.label)labels.push(n.attrs.label);});
   const insertBlock=content=>editor.chain().focus().insertContentAt(editor.state.selection.to,content).run();
+  const insertFormula=()=>{let index=1;while(labels.includes('eq:equation-'+index))index++;insertBlock({type:'displayMath',attrs:{latex:'E=mc^2',label:'eq:equation-'+index}});};
+  const insertReference=target=>{if(target)editor.chain().focus().insertContentAt(editor.state.selection.to,{type:'crossReference',attrs:{target}}).run();};
   function action(label,Icon,fn,active=false){return <button title={label} aria-label={label} className={active?'active':''} onMouseDown={e=>e.preventDefault()} onClick={fn}><Icon size={16}/></button>;}
   async function insertImage(file){
     if(!file||!/^image\/(png|jpeg|webp)$/.test(file.type)||file.size>15000000){notify('Choose a PNG, JPEG or WebP image under 15 MB.');return;}
@@ -182,6 +199,7 @@ export function FlowEditor({project,onChange,source,mode,setMode,compiled,compil
         <select aria-label="Line spacing" onChange={e=>chain().setLineHeight(e.target.value).run()} defaultValue="1.6">{['1','1.15','1.5','1.6','2'].map(n=><option key={n}>{n}</option>)}</select>
       </div>
       <div className="flow-ribbon-row secondary">
+        <button onMouseDown={e=>e.preventDefault()} onClick={()=>chain().insertContent({type:'inlineMath',attrs:{latex:'x^2'}}).run()}>Inline math</button><button onMouseDown={e=>e.preventDefault()} onClick={insertFormula}>Equation</button><select aria-label="Insert reference" defaultValue="" onChange={e=>{insertReference(e.target.value);e.target.value='';}}><option value="">Reference…</option>{labels.map(label=><option key={label} value={label}>{label}</option>)}</select>
         <button onClick={()=>imageInput.current.click()}><ImagePlus size={15}/>Image</button><button onClick={()=>figureInput.current.click()}><LayoutGrid size={15}/>Figure group</button><button onClick={()=>chain().insertTable({rows:3,cols:3,withHeaderRow:true}).run()}><Table2 size={15}/>Table</button>
         {action('Insert link',Link,()=>{setLink(editor.getAttributes('link').href||'');setLinkOpen(!linkOpen);})}
         <button onClick={()=>chain().insertContent({type:'pageBreak'}).run()}>Page break</button>
@@ -191,6 +209,7 @@ export function FlowEditor({project,onChange,source,mode,setMode,compiled,compil
         {[['visual','Write',FileText],['split','Split',Columns2],['code','LaTeX',Code2],['preview','PDF',FileText]].map(([m,label,Icon])=><button data-mode-control key={m} className={mode===m?'active':''} onClick={()=>setMode(m)}><Icon size={15}/>{label}</button>)}
         <button data-mode-control className="flow-build" disabled={compileBusy} onClick={compile}>{compileBusy?'Typesetting…':'Typeset PDF'}</button>{compileBusy&&<button data-mode-control onClick={()=>window.texSuite?.cancel()}>Cancel</button>}
       </div>
+      {editor.isActive('heading')&&<div className="flow-context"><span>HEADING LABEL</span><input aria-label="Heading label" placeholder="sec:introduction" value={editor.getAttributes('heading').label||''} onChange={e=>{if(!e.target.value||/^[A-Za-z][A-Za-z0-9:_.-]{0,79}$/.test(e.target.value))editor.commands.updateAttributes('heading',{label:e.target.value});}}/></div>}
       {editor.isActive('table')&&<div className="flow-context"><span>TABLE</span><button onClick={()=>chain().addRowAfter().run()}><Plus size={13}/>Row</button><button onClick={()=>chain().addColumnAfter().run()}><Plus size={13}/>Column</button><button onClick={()=>chain().deleteRow().run()}><Minus size={13}/>Row</button><button onClick={()=>chain().deleteColumn().run()}><Minus size={13}/>Column</button><button onClick={()=>chain().deleteTable().run()}>Delete table</button></div>}
       {linkOpen&&<div className="flow-context"><input aria-label="Link URL" placeholder="https://…" value={link} onChange={e=>setLink(e.target.value)}/><button onClick={()=>{if(/^https?:\/\//.test(link)){chain().setLink({href:link}).run();setLinkOpen(false);}else notify('Use an http or https link.');}}>Apply link</button><button onClick={()=>{chain().unsetLink().run();setLinkOpen(false);}}>Remove link</button></div>}
       {searchOpen&&<div className="flow-context"><input aria-label="Find text" placeholder="Find…" value={find} onChange={e=>setFind(e.target.value)}/><input aria-label="Replace with" placeholder="Replace with…" value={replacement} onChange={e=>setReplacement(e.target.value)}/><button onClick={findNext}>Find next</button><button onClick={replaceAll}>Replace all</button><span>{matches().length} matches · case insensitive</span></div>}

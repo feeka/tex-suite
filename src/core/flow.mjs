@@ -1,4 +1,5 @@
 import { publisherById } from './catalog.mjs';
+import {validFormula,validLabel} from './science.mjs';
 export const paragraph=text=>({type:'paragraph',content:text?[{type:'text',text}]:[]});
 export function newFlow(){
   return {publisherId:'article',authors:'Your name',affiliation:'Your institution',city:'Your city',country:'Your country',abstract:'Summarize the question, approach, and main finding.',keywords:'Research; methods',doc:{type:'doc',content:[
@@ -13,11 +14,14 @@ export function validateFlow(f){
   if(!f||!f.doc||f.doc.type!=='doc'||!['publisherId','authors','affiliation','abstract','keywords'].every(k=>typeof f[k]==='string'&&f[k].length<100000))throw new Error('Invalid manuscript.');
   if(['city','country'].some(k=>f[k]!=null&&(typeof f[k]!=='string'||f[k].length>10000)))throw new Error('Invalid affiliation metadata.');
   let count=0;
-  const types=new Set(['doc','paragraph','heading','text','bulletList','orderedList','listItem','blockquote','codeBlock','hardBreak','horizontalRule','image','figureGroup','table','tableRow','tableCell','tableHeader','pageBreak']);
+  const types=new Set(['doc','paragraph','heading','text','bulletList','orderedList','listItem','blockquote','codeBlock','hardBreak','horizontalRule','image','figureGroup','table','tableRow','tableCell','tableHeader','pageBreak','inlineMath','displayMath','crossReference']);
   function walk(n,depth=0){
     if(++count>50000||depth>30||!types.has(n.type))throw new Error('Invalid manuscript structure.');
     if(n.text!=null&&(typeof n.text!=='string'||n.text.length>100000))throw new Error('Invalid manuscript text.');
     if(n.type==='image'&&!/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=\s]+$/.test(n.attrs?.src??''))throw new Error('Images must be embedded PNG or JPEG.');
+    if((n.type==='inlineMath'||n.type==='displayMath')&&!validFormula(n.attrs?.latex))throw new Error('Invalid formula.');
+    if(n.attrs?.label&& !validLabel(n.attrs.label))throw new Error('Invalid label.');
+    if(n.type==='crossReference'&&n.attrs?.target&&!validLabel(n.attrs.target))throw new Error('Invalid reference target.');
     if(n.type==='figureGroup'){
       const a=n.attrs??{},panels=a.panels;
       if(!['row','column','grid'].includes(a.layout)||!['column','full'].includes(a.width)||typeof a.caption!=='string'||a.caption.length>10000||!Array.isArray(panels)||panels.length<1||panels.length>12)throw new Error('Invalid figure group.');
@@ -54,7 +58,10 @@ export function flowToLatex(project){
         }
       }return s;
     }
-    if(n.type==='heading')return `\n\\${['section','subsection','subsubsection'][Math.min(3,Math.max(1,n.attrs?.level||1))-1]}{${content()}}\n`;
+    if(n.type==='heading')return `\n\\${['section','subsection','subsubsection'][Math.min(3,Math.max(1,n.attrs?.level||1))-1]}{${content()}}${n.attrs?.label?`\\label{${n.attrs.label}}`:''}\n`;
+    if(n.type==='inlineMath')return `\\(${n.attrs.latex}\\)`;
+    if(n.type==='displayMath')return `\n\\begin{equation}\n${n.attrs.latex}\n${n.attrs.label?`\\label{${n.attrs.label}}\n`:''}\\end{equation}\n`;
+    if(n.type==='crossReference')return n.attrs.target?`\\ref{${n.attrs.target}}`:'??';
     if(n.type==='paragraph'){const a={center:'center',right:'flushright',left:'flushleft'}[n.attrs?.textAlign];const lines=(n.content||[]).flatMap(c=>c.marks||[]).map(m=>parseFloat(m.attrs?.lineHeight)).filter(v=>v>=1&&v<=3);const spacing=lines.length?`\\linespread{${Math.max(...lines)}}\\selectfont `:'';const text=spacing?`{${spacing}${content()}\\par}`:content();return a?`\\begin{${a}}${text}\\end{${a}}\n`:`${text}\\par\n`;}
     if(n.type==='bulletList'||n.type==='orderedList'){const env=n.type==='bulletList'?'itemize':'enumerate';return `\\begin{${env}}\n${content()}\\end{${env}}\n`;}
     if(n.type==='listItem')return `\\item ${content()}`;
@@ -83,7 +90,7 @@ export function flowToLatex(project){
       }else{
         body=files.map(item=>`${panelBody(item,1,item.panel.width/100)}\\par\\medskip\n`).join('');
       }
-      return `\\begin{${environment}}[!tbp]\n\\centering\n${body}${n.attrs.caption?`\\caption{${tex(n.attrs.caption)}}\n`:''}\\end{${environment}}\n`;
+      return `\\begin{${environment}}[!tbp]\n\\centering\n${body}${n.attrs.caption||n.attrs.label?`\\caption{${tex(n.attrs.caption)}}\n`:''}${n.attrs.label?`\\label{${n.attrs.label}}\n`:''}\\end{${environment}}\n`;
     }
     if(n.type==='table'){
       const cols=Math.max(...(n.content??[]).map(r=>(r.content??[]).reduce((sum,c)=>sum+Math.min(20,Number(c.attrs?.colspan)||1),0)),1);

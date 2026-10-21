@@ -26,11 +26,16 @@ export function projectToLatex(project) {
         return `\\path[${stroke}fill=${fill},rounded corners=${num((el.radius ?? 0) * mmPerUnit)}mm] (${x},${y}) rectangle (${num(x+w)},${num(y+h)});`;
       }
       if (el.type === 'image') return `\\node[anchor=north west,inner sep=0pt] at (${x},${y}) {\\includegraphics[width=${w}mm,height=${h}mm]{assets/${el.id.replace(/[^a-zA-Z0-9-]/g, '')}.${el.src.startsWith('data:image/jpeg')?'jpg':'png'}}};`;
+      if(el.type==='formula'){
+        const size=num(Math.max(8,(el.fontSize??28)*ptPerUnit));
+        return `\\refstepcounter{equation}${el.label?`\\label{${el.label}}`:''}\n\\node[anchor=north west,inner sep=0pt,outer sep=0pt,text width=${w}mm,text=${color(resolveColor(el,'color',project.palette))},font={\\fontsize{${size}}{${num(size*1.3)}}\\selectfont}] at (${x},${y}) {\\(\\displaystyle ${el.latex}\\)\\hfill(\\theequation)};`;
+      }
       const fs = num(Math.max(4, (el.fontSize ?? 16) * ptPerUnit));
       const leading = num(fs * (el.lineHeight ?? 1.25));
       const align = ({ left:'left',center:'center',right:'right' })[el.align] ?? 'left';
       const font = `\\${el.fontFamily === 'serif' ? 'rmfamily' : 'sffamily'}\\fontsize{${fs}}{${leading}}\\selectfont${el.fontWeight >= 600 ? '\\bfseries' : '\\mdseries'}${el.italic ? '\\itshape' : ''}${align==='left'?'\\raggedright':align==='right'?'\\raggedleft':'\\centering'}`;
       let contents = String(el.text??'').split(/\n\s*\n/).map(p=>escapeTex(p).replace(/\n/g,'\\\\')).join(`\\par\\vspace{${leading}pt}\\noindent `);
+      if(el.type==='reference')contents=el.target?`\\ref{${el.target}}`:'??';
       if (el.type === 'table') {
         const rows = el.data ?? [['Column','Value'],['Row','Value']];
         const columns = Math.max(...rows.map(r=>r.length));
@@ -43,7 +48,7 @@ export function projectToLatex(project) {
       }
       return `\\node[anchor=north west,inner sep=0pt,outer sep=0pt,text width=${w}mm,align=${align},text=${color(resolveColor(el,'color',project.palette))},font={${font}}] at (${x},${y}) {${contents}};`;
     }).join('\n');
-    return `${beamer ? '\\begin{frame}[plain]' : (pageIndex ? '\\newpage' : '')}
+    return `${beamer ? '\\begin{frame}[plain]' : (pageIndex ? '\\newpage' : '')}${beamer&&p.label?`\n\\label{${p.label}}`:''}
 \\begin{tikzpicture}[remember picture,overlay]
 \\begin{scope}[shift={(current page.north west)},x=1mm,y=-1mm]
 \\fill[${paperColor}] (0,0) rectangle (${num(W*mmPerUnit)},${num(H*mmPerUnit)});
@@ -60,6 +65,7 @@ ${beamer ? '\\documentclass[aspectratio=169]{beamer}' : '\\documentclass{article
 \\setsansfont{TeX Gyre Heros}
 \\usepackage{tikz}
 \\usepackage{graphicx}
+\\usepackage{amsmath}
 \\usepackage{xcolor}
 \\pagestyle{empty}
 \\hyphenpenalty=10000

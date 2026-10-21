@@ -1,4 +1,5 @@
 import {newFlow,validateFlow} from './flow.mjs';
+import {validFormula,validLabel} from './science.mjs';
 export const uid = () => globalThis.crypto?.randomUUID?.() ?? `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 export const dimensions = kind => kind === 'beamer' ? { width: 960, height: 540, margin: 48 } : { width: 794, height: 1123, margin: 68 };
 export const palettes = [
@@ -128,11 +129,14 @@ export function validateProject(value) {
   if (JSON.stringify(value).length > 70_000_000) throw new Error('This project is too large (70 MB limit).');
   if(value.flow)validateFlow(value.flow);
   for (const p of value.pages) {
+    if(p.label!=null&&p.label!==''&&!validLabel(p.label))throw new Error('Invalid slide label.');
     if(!/^[a-zA-Z0-9-]{1,100}$/.test(p.id??''))throw new Error('Invalid page identifier.');
     if (!Array.isArray(p.elements) || p.elements.length > 1000) throw new Error('Invalid page elements.');
     for (const el of p.elements) {
       if(!/^[a-zA-Z0-9-]{1,100}$/.test(el.id??''))throw new Error('Invalid element identifier.');
-      if (!['text','rect','image','table','list'].includes(el.type) || !['x','y','w','h'].every(k => Number.isFinite(el[k])) || el.w <= 0 || el.h <= 0) throw new Error('Invalid element geometry.');
+      if (!['text','rect','image','table','list','formula','reference'].includes(el.type) || !['x','y','w','h'].every(k => Number.isFinite(el[k])) || el.w <= 0 || el.h <= 0) throw new Error('Invalid element geometry.');
+      if(el.type==='formula'&&(!validFormula(el.latex)||(el.label&&!validLabel(el.label))))throw new Error('Invalid formula.');
+      if(el.type==='reference'&&el.target!==''&&!validLabel(el.target))throw new Error('Invalid reference.');
       if(el.type==='text'&&(typeof el.text!=='string'||el.text.length>100000))throw new Error('Invalid text element.');
       if(el.type==='list'&&(typeof el.text!=='string'||el.text.length>100000||!['itemize','enumerate'].includes(el.listStyle)))throw new Error('Invalid list element.');
       if(el.type==='table'&&(!Array.isArray(el.data)||!el.data.length||el.data.length>100||el.data.some(r=>!Array.isArray(r)||!r.length||r.length>20||r.some(c=>typeof c!=='string'))))throw new Error('Invalid table.');
@@ -171,5 +175,7 @@ export function addElement(type, kind, palette) {
   if (type === 'heading') return text('A fresh perspective', d.margin + 48, d.margin + 100, 500, 80, 38, { fontFamily: 'serif', colorRole: 'accent' });
   if (type === 'table') return { id: uid(), type, x: d.margin + 48, y: d.margin + 140, w: 420, h: 160, data: [['Category', 'Value', 'Notes'], ['First', '42', 'Your finding'], ['Second', '68', 'Your finding']], fontSize: 16 };
   if (type === 'list') return { id: uid(), type, x: kind === 'beamer' ? 560 : d.margin + 48, y: kind === 'beamer' ? 405 : d.margin + 140, w: kind === 'beamer' ? 350 : 600, h: kind === 'beamer' ? 80 : 180, text: 'First point\nSecond point', listStyle: 'itemize', fontSize: 18, lineHeight: 1.4 };
+  if (type === 'formula') return { id: uid(), type, x: d.margin + 90, y: d.margin + 180, w: 550, h: 90, latex: 'E=mc^2', label: '', fontSize: 28, colorRole: 'ink' };
+  if (type === 'reference') return { id: uid(), type, x: d.margin + 90, y: d.margin + 290, w: 250, h: 45, target: '', fontSize: 18, colorRole: 'ink' };
   return shape(d.margin + 70, d.margin + 90, 220, 120, 'muted', { radius: 12 });
 }

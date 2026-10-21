@@ -8,15 +8,16 @@ Open the newest tag, then its **Release** and choose the installer for your syst
 
 ## Current scope
 
-- **Beamer:** Edit slides visually or in LaTeX source; add text, lists, images, shapes, tables, and notes. Compile and preview the resulting PDF.
-- **Manuscripts:** Write in a flowing editor or LaTeX source; add tables, images, and figure groups.
+- **Beamer:** Edit slides visually or in LaTeX source; add text, lists, images, shapes, tables, notes, formulas, and references to labeled slides or equations. Compile and preview the resulting PDF.
+- **Manuscripts:** Write in a flowing editor or LaTeX source; add inline and displayed formulas, label headings/figures/equations, and insert cross-references alongside tables, images, and figure groups.
 - **Files:** Projects autosave locally as `.texsuite` files. **File location** in the editor shows where a project is saved. Export source or PDF separately.
 
 ## Still lacking
 
-- The visual canvas is not an exact preview of TeX typesetting. Check the compiled PDF for final placement and pagination.
+- The visual canvas is not an exact preview of TeX typesetting. Formula controls show their LaTeX source; check the compiled PDF for typeset math, final placement, and pagination.
 - Advanced LaTeX and Beamer features, including overlays, custom commands, bibliography workflows, and complex page layouts, require source editing. The visual controls do not cover all of LaTeX or Microsoft Office.
 - Journal and university templates cover only a limited set. A template does not guarantee compliance with current submission rules, and required TeX packages may need to be installed.
+- Word export keeps formula source and reference labels as text, not native Word equations or live cross-reference fields.
 - There is no real-time collaboration or cloud sync. Keep copies of important projects yourself.
 - macOS and Linux installers still need hands-on user testing. Please report failures with the operating system, template, and relevant compiler log.
 
