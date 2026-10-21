@@ -5,8 +5,6 @@ const {version}=JSON.parse(readFileSync(new URL('../package.json',import.meta.ur
 const names=new Set(readdirSync(resolve(process.argv[2]||'release-assets')));
 const expected=[
   `TeX Suite-${version}-win-x64.exe`,
-  `TeX Suite-${version}-mac-x64.dmg`,
-  `TeX Suite-${version}-mac-arm64.dmg`,
   `TeX Suite-${version}-linux-x86_64.AppImage`,
   `TeX Suite-${version}-linux-arm64.AppImage`,
   `TeX Suite-${version}-linux-amd64.deb`,
