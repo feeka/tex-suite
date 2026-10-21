@@ -74,7 +74,7 @@ jobs:
       - name: Verify release files
         run: node scripts/verify-assets.mjs release-assets
       - name: Generate checksums
-        run: cd release-assets && sha256sum *.exe *.AppImage *.deb > SHA256SUMS.txt
+        run: cd release-assets && sha256sum *.exe *.AppImage *.deb | sed 's/TeX Suite-/TeX.Suite-/' > SHA256SUMS.txt
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
