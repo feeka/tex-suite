@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {createProject,templates,dimensions,snapRect,validateProject} from '../src/core/model.mjs';
+import {createProject,addElement,templates,dimensions,snapRect,validateProject} from '../src/core/model.mjs';
 import {escapeTex,projectToLatex,extractAssets} from '../src/core/latex.mjs';
 
 test('15 templates generate independent valid projects for both editors',()=>{
@@ -41,4 +41,15 @@ test('literal text is escaped and frame counts match the project',()=>{
   assert.match(tex,/\\textbackslash\{\}input\\\{private\\\}/);
   assert.equal((tex.match(/\\begin\{frame\}/g)||[]).length,3);
   assert.deepEqual(extractAssets(p),[]);
+});
+test('visual lists produce real LaTeX lists and escape item text',()=>{
+  const p=createProject('beamer');
+  const bullets=addElement('list','beamer');
+  bullets.text='First point\n50% & safe';
+  p.pages[1].elements.push(bullets);
+  const numbers={...addElement('list','beamer'),listStyle:'enumerate',text:'One\nTwo'};
+  p.pages[2].elements.push(numbers);
+  const tex=projectToLatex(p);
+  assert.match(tex,/\\begin\{itemize\}[\s\S]*?\\item First point[\s\S]*?\\item 50\\% \\& safe[\s\S]*?\\end\{itemize\}/);
+  assert.match(tex,/\\begin\{enumerate\}[\s\S]*?\\item One[\s\S]*?\\item Two[\s\S]*?\\end\{enumerate\}/);
 });

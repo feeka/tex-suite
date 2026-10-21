@@ -16,6 +16,7 @@ export function projectToLatex(project) {
   const colors = [];
   const color = c => { const name = `tscolor${colorIndex++}`; colors.push(`\\definecolor{${name}}{HTML}{${hex(c)}}`); return name; };
   const paperColor = color(project.palette.paper);
+  const accentColor = color(project.palette.accent);
   const frames = project.pages.map((p, pageIndex) => {
     const objects = p.elements.map(el => {
       const x = num(el.x * mmPerUnit), y = num(el.y * mmPerUnit), w = num(el.w * mmPerUnit), h = num(el.h * mmPerUnit);
@@ -34,6 +35,11 @@ export function projectToLatex(project) {
         const rows = el.data ?? [['Column','Value'],['Row','Value']];
         const columns = Math.max(...rows.map(r=>r.length));
         contents = `\\renewcommand{\\arraystretch}{1.4}\\setlength{\\tabcolsep}{3pt}\\begin{tabular}{${Array(columns).fill(`p{${num(Math.max(1,w / columns - 2.2))}mm}`).join('')}}\\hline\n${rows.map(row=>Array.from({length:columns},(_,i)=>escapeTex(row[i]??'')).join(' & ')).join('\\\\\\hline\n')}\\\\\\hline\\end{tabular}`;
+      }
+      if (el.type === 'list') {
+        const env = el.listStyle === 'enumerate' ? 'enumerate' : 'itemize';
+        const items = el.text.split('\n').map(item => item.trim()).filter(Boolean);
+        contents = `\\begin{${env}}\n${items.map(item => `\\item ${escapeTex(item)}`).join('\n')}\n\\end{${env}}`;
       }
       return `\\node[anchor=north west,inner sep=0pt,outer sep=0pt,text width=${w}mm,align=${align},text=${color(resolveColor(el,'color',project.palette))},font={${font}}] at (${x},${y}) {${contents}};`;
     }).join('\n');
@@ -60,6 +66,7 @@ ${beamer ? '\\documentclass[aspectratio=169]{beamer}' : '\\documentclass{article
 \\exhyphenpenalty=10000
 ${beamer ? '\\setbeamertemplate{navigation symbols}{}' : ''}
 ${colors.join('\n')}
+${beamer ? `\\setbeamercolor{itemize item}{fg=${accentColor}}\\setbeamercolor{enumerate item}{fg=${accentColor}}` : `\\renewcommand{\\labelitemi}{\\textcolor{${accentColor}}{\\textbullet}}`}
 \\begin{document}
 ${frames}
 \\end{document}

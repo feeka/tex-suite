@@ -9,6 +9,10 @@ const svc=new TexService(path.resolve('.cache/tex-test'));
 console.log('Compiler:',await svc.detect());
 for(const kind of ['beamer','manuscript']){
   const project=createProject(kind);
+  if(kind==='beamer'){
+    project.pages[1].elements.push({...addElement('list',kind),x:110,y:220,text:'First point\nSecond point'});
+    project.pages[2].elements.push({...addElement('list',kind),x:110,y:220,listStyle:'enumerate',text:'One\nTwo'});
+  }
   if(kind==='manuscript')project.pages[0].elements.push({...addElement('table',kind),y:930,h:100,fontSize:13});
   const result=await svc.compile(projectToLatex(project));
   await fs.writeFile(`test-results/${kind}.log`,result.log);

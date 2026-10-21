@@ -1,4 +1,4 @@
-import React,{useEffect,useRef,useState} from 'react';
+import React,{useCallback,useEffect,useRef,useState} from 'react';
 import {useEditor,EditorContent,NodeViewWrapper,ReactNodeViewRenderer} from '@tiptap/react';
 import {Node} from '@tiptap/core';
 import {DOMParser as ProseMirrorParser} from '@tiptap/pm/model';
@@ -11,12 +11,14 @@ import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import CodeMirror from '@uiw/react-codemirror';
 import {StreamLanguage} from '@codemirror/language';
+import {EditorView} from '@codemirror/view';
 import {stex} from '@codemirror/legacy-modes/mode/stex';
 import {publishers,publisherById} from './core/catalog.mjs';
 import {flowText} from './core/flow.mjs';
 import {palettes} from './core/model.mjs';
 import {Bold,Italic,Underline,Strikethrough,Undo2,Redo2,List,ListOrdered,AlignLeft,AlignCenter,AlignRight,AlignJustify,ImagePlus,Table2,Search,Link,FileText,Code2,Columns2,Download,Upload,Plus,Minus,GripVertical,Trash2,LayoutGrid} from 'lucide-react';
 import './flow.css';
+const latexExtensions=[StreamLanguage.define(stex),EditorView.lineWrapping];
 
 function WidthInput({label,value,min,max,onCommit,unit}){
   const [draft,setDraft]=useState(String(value));
@@ -79,6 +81,13 @@ function FigureGroupView({node,updateAttributes,deleteNode,selected}){
 const FigureGroup=Node.create({name:'figureGroup',group:'block',atom:true,selectable:true,draggable:false,addAttributes(){return{layout:{default:'row'},width:{default:'column'},caption:{default:''},panels:{default:[]}};},parseHTML(){return[{tag:'figure[data-figure-group]'}];},renderHTML({node}){return['figure',{'data-figure-group':'true','data-layout':node.attrs.layout},['figcaption',{},node.attrs.caption||'Figure group']];},addNodeView(){return ReactNodeViewRenderer(FigureGroupView);}});
 export function FlowEditor({project,onChange,source,mode,setMode,compiled,compile,compileBusy,notify}){
   const latest=useRef(project);latest.current=project;
+  const sourceRef=useRef(source);sourceRef.current=source;
+  const onChangeRef=useRef(onChange);onChangeRef.current=onChange;
+  const onSourceChange=useCallback(value=>{
+    if(value===sourceRef.current)return;
+    sourceRef.current=value;
+    onChangeRef.current({...latest.current,sourceOverride:value});
+  },[]);
   const [revision,refresh]=useState(0),[find,setFind]=useState(''),[replacement,setReplacement]=useState(''),[searchOpen,setSearchOpen]=useState(false),[linkOpen,setLinkOpen]=useState(false),[link,setLink]=useState(''),[metaOpen,setMetaOpen]=useState(false);
   const imageInput=useRef(),figureInput=useRef(),wordInput=useRef();
   const [templateState,setTemplateState]=useState({status:'idle'});
@@ -206,7 +215,7 @@ export function FlowEditor({project,onChange,source,mode,setMode,compiled,compil
         <p><button onClick={()=>window.texSuite?window.texSuite.openReference(p.id):window.open(p.url,'_blank','noopener')}>Template source & guidance ↗</button></p>
       </div></aside>
       <div className={`flow-panes ${mode}`}>
-        {mode==='code'&&<div className="flow-code"><CodeMirror value={source} height="100%" extensions={[StreamLanguage.define(stex)]} onChange={value=>{if(value!==source)onChange({...latest.current,sourceOverride:value});}}/></div>}
+        {mode==='code'&&<div className="flow-code"><CodeMirror value={source} height="100%" extensions={latexExtensions} onChange={onSourceChange}/></div>}
         {(mode==='visual'||mode==='split')&&<div className="flow-scroll">
           {project.sourceOverride!=null&&<div className="source-banner">Custom source is active.<button onClick={()=>onChange({...latest.current,sourceOverride:null})}>Restore generated source</button></div>}
           <div className="flow-paper" style={{'--document-accent':'#222222'}}>

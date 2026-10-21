@@ -20,10 +20,10 @@ export async function exportDocx(project){
       if(n.type==='image'){
         const data=Uint8Array.from(atob(n.attrs.src.split(',')[1]),c=>c.charCodeAt(0));
         const width=Math.min(600,Number(n.attrs.width)||300),size=sizes.get(n.attrs.src);
-        return new Paragraph({children:[new ImageRun({data,type:n.attrs.src.startsWith('data:image/jpeg')?'jpg':'png',transformation:{width,height:Math.round(width*size.h/size.w)}})]});
+        return new Paragraph({children:[new ImageRun({data,type:n.attrs.src.startsWith('data:image/jpeg')?'jpg':'png',transformation:{width,height:width*size.h/size.w}})]});
       }
       if(n.type==='figureGroup'){
-        const image=(panel,width)=>{const data=Uint8Array.from(atob(panel.src.split(',')[1]),c=>c.charCodeAt(0)),size=sizes.get(panel.src);return new Paragraph({children:[new ImageRun({data,type:panel.src.startsWith('data:image/jpeg')?'jpg':'png',transformation:{width,height:Math.round(width*size.h/size.w)}})]});};
+        const image=(panel,width)=>{const data=Uint8Array.from(atob(panel.src.split(',')[1]),c=>c.charCodeAt(0)),size=sizes.get(panel.src);return new Paragraph({children:[new ImageRun({data,type:panel.src.startsWith('data:image/jpeg')?'jpg':'png',transformation:{width,height:width*size.h/size.w}})]});};
         const cell=(panel,width)=>new TableCell({children:[image(panel,width),...(panel.caption?[new Paragraph({text:panel.caption})]:[])]});
         let content;
         if(n.attrs.layout==='column')content=n.attrs.panels.flatMap(panel=>[image(panel,Math.round(540*panel.width/100)),...(panel.caption?[new Paragraph({text:panel.caption})]:[])]);

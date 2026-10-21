@@ -1,6 +1,6 @@
 import {defineConfig} from '@playwright/test';
 export default defineConfig({
   testDir:'./tests/ui',timeout:45000,workers:1,
-  use:{baseURL:'http://127.0.0.1:5173',viewport:{width:1500,height:980},screenshot:'only-on-failure'},
+  use:{baseURL:'http://127.0.0.1:5173',viewport:{width:1500,height:980},screenshot:'only-on-failure',...(process.env.TEXSUITE_BROWSER_PATH?{launchOptions:{executablePath:process.env.TEXSUITE_BROWSER_PATH}}:{})},
   webServer:{command:'npm run dev',url:'http://127.0.0.1:5173',reuseExistingServer:true,timeout:30000},
 });

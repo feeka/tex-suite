@@ -1,50 +1,27 @@
 # TeX Suite
 
-[Website and downloads](https://feeka.github.io/tex-suite/) · [v0.3.2 release](https://github.com/feeka/tex-suite/releases/tag/v0.3.2) · [Report a problem or request a feature](https://github.com/feeka/tex-suite/issues/new)
+A local desktop editor for LaTeX manuscripts and Beamer presentations. Work visually or edit LaTeX source, then compile and preview a PDF.
 
-A local desktop editor for LaTeX manuscripts and Beamer presentations. Edit visually or in source, compile with a local TeX engine, and preview the PDF.
+**[Download from version tags](https://github.com/feeka/tex-suite/tags)** · **[Report a problem or request a feature](https://github.com/feeka/tex-suite/issues/new)**
 
-TeX Suite is an **open-source side project for TeX enthusiasts, vibe coded with OpenAI Codex**. Put bugs, confusing behavior, template requests, and feature ideas in [GitHub Issues](https://github.com/feeka/tex-suite/issues); we can work through them together.
+Open the newest tag, then its **Release** and choose the installer for your system under **Assets**. The “Source code” archives are not installers. Builds are provided for Windows x64, macOS Intel and Apple silicon, and Linux x64 and ARM64. They are unsigned. Windows x64 is tested locally; macOS and Linux packages are built on native GitHub runners but have not had hands-on testing here.
 
-## What it does
+## Current scope
 
-- **Manuscripts:** Write in visual, split, or LaTeX mode. Add tables and figures; arrange figure panels side by side, in a grid, or one below another, and set their widths.
-- **Presentations:** Edit Beamer slides visually or in LaTeX and compile a PDF. Start from built-in layouts or use a university theme's source.
-- **Local files:** Autosave editable `.texsuite` projects, see their exact location, and export LaTeX source or a compiled PDF. LaTeX controls the final typeset layout.
+- **Beamer:** Edit slides visually or in LaTeX source; add text, lists, images, shapes, tables, and notes. Compile and preview the resulting PDF.
+- **Manuscripts:** Write in a flowing editor or LaTeX source; add tables, images, and figure groups.
+- **Files:** Projects autosave locally as `.texsuite` files. **File location** in the editor shows where a project is saved. Export source or PDF separately.
 
-## Download
+## Still lacking
 
-Get an installer from the [TeX Suite website](https://feeka.github.io/tex-suite/) or [GitHub Releases](https://github.com/feeka/tex-suite/releases/tag/v0.3.2). Version 0.3.2 has Windows x64, macOS Intel and Apple silicon, and Linux x64 and ARM64 builds. The installers are unsigned. Windows x64 has been tested locally; the macOS and Linux builds were produced on native GitHub runners but not tested on this machine.
+- The visual canvas is not an exact preview of TeX typesetting. Check the compiled PDF for final placement and pagination.
+- Advanced LaTeX and Beamer features, including overlays, custom commands, bibliography workflows, and complex page layouts, require source editing. The visual controls do not cover all of LaTeX or Microsoft Office.
+- Journal and university templates cover only a limited set. A template does not guarantee compliance with current submission rules, and required TeX packages may need to be installed.
+- There is no real-time collaboration or cloud sync. Keep copies of important projects yourself.
+- macOS and Linux installers still need hands-on user testing. Please report failures with the operating system, template, and relevant compiler log.
 
-The [landing page source](docs/index.html) is published through [GitHub Pages](.github/workflows/pages.yml) and links directly to the release files.
+A local TeX distribution is needed to compile. TeX Suite can detect an existing installation or set up TinyTeX; first-time setup and missing packages may need internet access.
 
-## Build and run
+TeX Suite is an **open-source side project for TeX enthusiasts, vibe coded with OpenAI Codex**. Please put bugs, confusing behavior, and feature requests in [Issues](https://github.com/feeka/tex-suite/issues) so we can work through them together.
 
-Requires Node.js 22 or later and npm.
-
-```sh
-npm ci
-npm test
-npm run build
-npm start
-```
-
-Build an installer on the matching operating system:
-
-| System | Command | Output |
-| --- | --- | --- |
-| Windows x64 | `npm run dist:win` | `.exe` |
-| macOS Intel + Apple silicon | `npm run dist:mac` | `.dmg` |
-| Linux, host architecture | `npm run dist:linux` | `.AppImage`, `.deb` |
-
-Output is written to `release-v032/`. A LaTeX distribution is required to compile documents; the app detects one or can set up TinyTeX. Initial setup and missing packages require internet access.
-
-## Files and templates
-
-Projects autosave as `.texsuite` files. **File location** beside the save status shows the full path and selects the file in the system file manager. PDF, LaTeX, Word, and portable project exports use the location chosen in their Save dialogs.
-
-Journal formats use real LaTeX classes. Publisher and university class files are installed or downloaded as needed, not bundled in this repository. Check current submission instructions before using a journal template. Institutional logos are omitted.
-
-## License
-
-The app source is [MIT licensed](LICENSE). Bundled TeX Gyre fonts use the separate [GUST Font License](assets/GUST-FONT-LICENSE.txt). Library notices are in [THIRD-PARTY.txt](THIRD-PARTY.txt) and [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).
+Source code is [MIT licensed](LICENSE). Bundled TeX Gyre fonts use the [GUST Font License](assets/GUST-FONT-LICENSE.txt); other notices are in [THIRD-PARTY.txt](THIRD-PARTY.txt) and [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).

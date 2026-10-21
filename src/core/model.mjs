@@ -112,6 +112,7 @@ export function flowingCopy(original){
     }
     if(el.type==='image')return [{type:'image',attrs:{src:el.src,alt:el.alt||'',width:Math.min(660,el.w),wrap:'none'}}];
     if(el.type==='table')return [{type:'table',content:el.data.map((row,i)=>({type:'tableRow',content:row.map(text=>({type:i?'tableCell':'tableHeader',content:[{type:'paragraph',content:text?[{type:'text',text}]:[]}]}))}))}];
+    if(el.type==='list')return [{type:el.listStyle==='enumerate'?'orderedList':'bulletList',content:el.text.split('\n').filter(Boolean).map(text=>({type:'listItem',content:[{type:'paragraph',content:[{type:'text',text}]}]}))}];
     return [];
   }));
   p.flow.doc={type:'doc',content:content.length?content:[{type:'paragraph'}]};
@@ -131,8 +132,9 @@ export function validateProject(value) {
     if (!Array.isArray(p.elements) || p.elements.length > 1000) throw new Error('Invalid page elements.');
     for (const el of p.elements) {
       if(!/^[a-zA-Z0-9-]{1,100}$/.test(el.id??''))throw new Error('Invalid element identifier.');
-      if (!['text','rect','image','table'].includes(el.type) || !['x','y','w','h'].every(k => Number.isFinite(el[k])) || el.w <= 0 || el.h <= 0) throw new Error('Invalid element geometry.');
+      if (!['text','rect','image','table','list'].includes(el.type) || !['x','y','w','h'].every(k => Number.isFinite(el[k])) || el.w <= 0 || el.h <= 0) throw new Error('Invalid element geometry.');
       if(el.type==='text'&&(typeof el.text!=='string'||el.text.length>100000))throw new Error('Invalid text element.');
+      if(el.type==='list'&&(typeof el.text!=='string'||el.text.length>100000||!['itemize','enumerate'].includes(el.listStyle)))throw new Error('Invalid list element.');
       if(el.type==='table'&&(!Array.isArray(el.data)||!el.data.length||el.data.length>100||el.data.some(r=>!Array.isArray(r)||!r.length||r.length>20||r.some(c=>typeof c!=='string'))))throw new Error('Invalid table.');
       if(el.fontSize!=null&&(!Number.isFinite(el.fontSize)||el.fontSize<1||el.fontSize>500))throw new Error('Invalid font size.');
       if(el.lineHeight!=null&&(!Number.isFinite(el.lineHeight)||el.lineHeight<=0||el.lineHeight>5))throw new Error('Invalid line height.');
@@ -168,5 +170,6 @@ export function addElement(type, kind, palette) {
   if (type === 'text') return text('Your idea goes here', d.margin + 48, d.margin + 100, 350, 64, 26);
   if (type === 'heading') return text('A fresh perspective', d.margin + 48, d.margin + 100, 500, 80, 38, { fontFamily: 'serif', colorRole: 'accent' });
   if (type === 'table') return { id: uid(), type, x: d.margin + 48, y: d.margin + 140, w: 420, h: 160, data: [['Category', 'Value', 'Notes'], ['First', '42', 'Your finding'], ['Second', '68', 'Your finding']], fontSize: 16 };
+  if (type === 'list') return { id: uid(), type, x: kind === 'beamer' ? 560 : d.margin + 48, y: kind === 'beamer' ? 405 : d.margin + 140, w: kind === 'beamer' ? 350 : 600, h: kind === 'beamer' ? 80 : 180, text: 'First point\nSecond point', listStyle: 'itemize', fontSize: 18, lineHeight: 1.4 };
   return shape(d.margin + 70, d.margin + 90, 220, 120, 'muted', { radius: 12 });
 }
