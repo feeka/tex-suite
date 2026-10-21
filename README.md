@@ -6,6 +6,8 @@ A local desktop editor for LaTeX manuscripts and Beamer presentations. Work visu
 
 Open the newest tag, then its **Release** and choose the installer for your system under **Assets**. The “Source code” archives are not installers. Windows x64 is tested locally. Linux x64 and ARM64 packages are built on native runners but need hands-on testing.
 
+The `main` branch contains version **0.3.9**, including the equation-label synchronization fix and expanded tests. **0.3.9 is not a tagged download yet**; the latest tagged release does not contain these changes.
+
 **macOS:** The v0.3.7 DMGs are unsigned and unnotarized. A user has confirmed that macOS rejects the Apple silicon app as damaged. Do not use those Mac downloads. Future Mac releases must pass Developer ID signing, Apple notarization, and Gatekeeper checks before publication.
 
 ## Current scope
@@ -24,6 +26,10 @@ Open the newest tag, then its **Release** and choose the installer for your syst
 - Linux installers still need hands-on user testing. Please report failures with the operating system, template, and relevant compiler log.
 
 A local TeX distribution is needed to compile. TeX Suite can detect an existing installation or set up TinyTeX; first-time setup and missing packages may need internet access.
+
+## Testing
+
+On Windows, 0.3.9 passed 27 unit tests, 18 browser tests, 30 built-in design compilations, 42 journal document compilations, and packaged-app tests for editing, project import/export, figures, and both university themes. The isolated TinyTeX setup test also installed a compiler and built a PDF. Reproduce these checks with `node --test tests/*.test.mjs`, `npx playwright test`, and the scripts in [`scripts/`](scripts/). macOS and Linux runtime behavior remain unverified.
 
 TeX Suite is an **open-source side project for TeX enthusiasts, vibe coded with OpenAI Codex**. Please put bugs, confusing behavior, and feature requests in [Issues](https://github.com/feeka/tex-suite/issues) so we can work through them together.
 
