@@ -1,6 +1,7 @@
 // Exercises setup in an isolated app directory, without replacing system TeX.
 import {createRequire} from 'node:module';
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import {createProject} from '../src/core/model.mjs';
 import {projectToLatex} from '../src/core/latex.mjs';
@@ -17,7 +18,10 @@ class IsolatedService extends TexService{
     }return null;
   }
 }
-const svc=new IsolatedService(path.resolve('.cache/managed-setup-test'));
+// TeX Live's Windows tar.exe is not long-path aware. Use a short, fresh temp
+// directory like the app's user-data location instead of this deep repo path.
+const root=await fs.mkdtemp(path.join(os.tmpdir(),'ts-setup-'));
+const svc=new IsolatedService(root);
 let last='';
 svc.on('progress',p=>{const s=p.message.replace(/ · \d+ MB/,'');if(s!==last){console.log(p.message);last=s;}});
 const installed=await svc.install();console.log('Installed:',installed.version);
